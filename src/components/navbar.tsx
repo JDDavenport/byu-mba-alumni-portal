@@ -15,6 +15,8 @@ import { cn } from "@/lib/utils";
 const navLinks = [
   { href: "/", label: "Home" },
   { href: "/directory", label: "Directory" },
+  { href: "/events", label: "Events" },
+  { href: "/jobs", label: "Jobs" },
   { href: "#", label: "Map", disabled: true },
 ];
 
@@ -59,12 +61,12 @@ export function Navbar() {
 
         {/* Desktop CTA */}
         <div className="hidden md:block">
-          <Button
-            className="bg-[#002E5D] hover:bg-[#002E5D]/90"
-            disabled
+          <Link
+            href="/auth"
+            className="inline-flex h-8 items-center justify-center rounded-lg bg-[#002E5D] px-2.5 text-sm font-medium text-white transition-colors hover:bg-[#002E5D]/90"
           >
-            Sign in with LinkedIn
-          </Button>
+            Sign In
+          </Link>
         </div>
 
         {/* Mobile menu */}
@@ -110,12 +112,13 @@ export function Navbar() {
                   )}
                 </Link>
               ))}
-              <Button
-                className="mt-4 bg-[#002E5D] hover:bg-[#002E5D]/90"
-                disabled
+              <Link
+                href="/auth"
+                onClick={() => setOpen(false)}
+                className="mt-4 inline-flex h-8 items-center justify-center rounded-lg bg-[#002E5D] px-2.5 text-sm font-medium text-white transition-colors hover:bg-[#002E5D]/90"
               >
-                Sign in with LinkedIn
-              </Button>
+                Sign In
+              </Link>
             </nav>
           </SheetContent>
         </Sheet>

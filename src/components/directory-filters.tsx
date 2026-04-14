@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useMemo } from "react";
+import { useState, useMemo, useEffect, useCallback } from "react";
 import { Input } from "@/components/ui/input";
 import {
   Select,
@@ -12,10 +12,11 @@ import {
 import { Button } from "@/components/ui/button";
 import { AlumniCard } from "@/components/alumni-card";
 import {
-  alumni as allAlumni,
+  alumni as staticAlumni,
   getUniqueIndustries,
   getUniqueCompanies,
   getUniqueCities,
+  type Alumni,
 } from "@/data/alumni";
 
 const ALL = "__all__";
@@ -26,6 +27,9 @@ export function DirectoryFilters() {
   const [company, setCompany] = useState(ALL);
   const [city, setCity] = useState(ALL);
   const [yearRange, setYearRange] = useState(ALL);
+  const [alumni, setAlumni] = useState<Alumni[]>(staticAlumni);
+  const [loading, setLoading] = useState(false);
+  const [useApi, setUseApi] = useState(true);
 
   const industries = useMemo(() => getUniqueIndustries(), []);
   const companies = useMemo(() => getUniqueCompanies(), []);
@@ -34,8 +38,50 @@ export function DirectoryFilters() {
   const set = (setter: (v: string) => void) => (v: string | null) =>
     setter(v ?? ALL);
 
+  // Fetch from API when filters change
+  const fetchAlumni = useCallback(async () => {
+    if (!useApi) return;
+
+    setLoading(true);
+    try {
+      const params = new URLSearchParams();
+      if (search) params.set("q", search);
+      if (industry !== ALL) params.set("industry", industry);
+      if (company !== ALL) params.set("company", company);
+      if (city !== ALL) params.set("city", city);
+      if (yearRange !== ALL) {
+        const [min, max] = yearRange.split("-");
+        params.set("year_min", min);
+        params.set("year_max", max);
+      }
+
+      const res = await fetch(`/api/alumni?${params.toString()}`);
+      if (res.ok) {
+        const data = await res.json();
+        setAlumni(data);
+      } else {
+        // API returned error — fall back to static filtering
+        setUseApi(false);
+      }
+    } catch {
+      // Network error — fall back to static filtering
+      setUseApi(false);
+    } finally {
+      setLoading(false);
+    }
+  }, [search, industry, company, city, yearRange, useApi]);
+
+  // Debounce the API calls
+  useEffect(() => {
+    const timer = setTimeout(fetchAlumni, 300);
+    return () => clearTimeout(timer);
+  }, [fetchAlumni]);
+
+  // Static fallback filtering
   const filtered = useMemo(() => {
-    return allAlumni.filter((a) => {
+    if (useApi) return alumni;
+
+    return staticAlumni.filter((a) => {
       if (search) {
         const q = search.toLowerCase();
         const match =
@@ -54,7 +100,7 @@ export function DirectoryFilters() {
       }
       return true;
     });
-  }, [search, industry, company, city, yearRange]);
+  }, [alumni, useApi, search, industry, company, city, yearRange]);
 
   function handleReset() {
     setSearch("");
@@ -65,7 +111,11 @@ export function DirectoryFilters() {
   }
 
   const hasFilters =
-    search || industry !== ALL || company !== ALL || city !== ALL || yearRange !== ALL;
+    search ||
+    industry !== ALL ||
+    company !== ALL ||
+    city !== ALL ||
+    yearRange !== ALL;
 
   return (
     <div>
@@ -133,7 +183,13 @@ export function DirectoryFilters() {
       {/* Results count + reset */}
       <div className="mb-4 flex items-center justify-between">
         <p className="text-sm text-gray-500">
-          {filtered.length} alumni{filtered.length === 1 ? "" : ""} found
+          {loading ? (
+            "Loading..."
+          ) : (
+            <>
+              {filtered.length} alumni found
+            </>
+          )}
         </p>
         {hasFilters && (
           <Button variant="ghost" size="sm" onClick={handleReset}>
@@ -142,8 +198,17 @@ export function DirectoryFilters() {
         )}
       </div>
 
-      {/* Grid */}
-      {filtered.length > 0 ? (
+      {/* Loading state */}
+      {loading ? (
+        <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+          {Array.from({ length: 6 }).map((_, i) => (
+            <div
+              key={i}
+              className="h-28 animate-pulse rounded-lg border bg-gray-100"
+            />
+          ))}
+        </div>
+      ) : filtered.length > 0 ? (
         <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
           {filtered.map((a) => (
             <AlumniCard key={a.id} alumni={a} />
