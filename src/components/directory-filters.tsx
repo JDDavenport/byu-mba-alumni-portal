@@ -120,7 +120,7 @@ export function DirectoryFilters() {
   return (
     <div>
       {/* Filters */}
-      <div className="mb-6 grid gap-3 sm:grid-cols-2 lg:grid-cols-5">
+      <div className="mb-6 grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-5">
         <Input
           placeholder="Search name, company, title, city..."
           value={search}

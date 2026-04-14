@@ -1,5 +1,19 @@
+import type { Metadata } from "next";
 import Link from "next/link";
 import { alumni } from "@/data/alumni";
+
+export const metadata: Metadata = {
+  title: {
+    absolute: "BYU MBA Alumni Network — Connect, Mentor, Grow",
+  },
+  description:
+    "Your Marriott School network, everywhere. Find alumni by city, industry, or class year. Get mentored. Share opportunities. Strengthen the Cougar connection.",
+  openGraph: {
+    title: "BYU MBA Alumni Network — Connect, Mentor, Grow",
+    description:
+      "Your Marriott School network, everywhere. Find alumni by city, industry, or class year.",
+  },
+};
 
 export default function Home() {
   const cities = new Set(alumni.map((a) => `${a.city}, ${a.state}`)).size;
@@ -23,13 +37,16 @@ export default function Home() {
             <div className="mt-10 flex flex-col items-center justify-center gap-4 sm:flex-row">
               <Link
                 href="/directory"
-                className="inline-flex h-9 items-center justify-center rounded-lg bg-white px-4 text-sm font-medium text-[#002E5D] transition-colors hover:bg-white/90"
+                className="inline-flex h-11 w-full items-center justify-center rounded-lg bg-white px-6 text-sm font-medium text-[#002E5D] transition-colors hover:bg-white/90 sm:h-9 sm:w-auto sm:px-4"
               >
                 Browse Directory
               </Link>
-              <span className="inline-flex h-9 items-center justify-center rounded-lg border border-white/30 px-4 text-sm font-medium text-white opacity-50">
-                Find Alumni Near You (coming soon)
-              </span>
+              <Link
+                href="/map"
+                className="inline-flex h-11 w-full items-center justify-center rounded-lg border border-white/30 px-6 text-sm font-medium text-white transition-colors hover:bg-white/10 sm:h-9 sm:w-auto sm:px-4"
+              >
+                Find Alumni Near You
+              </Link>
             </div>
           </div>
         </div>
@@ -52,7 +69,7 @@ export default function Home() {
         <h2 className="text-center text-2xl font-bold text-gray-900 sm:text-3xl">
           Why Join the Network?
         </h2>
-        <div className="mt-12 grid gap-8 sm:grid-cols-3">
+        <div className="mt-12 grid grid-cols-1 gap-8 sm:grid-cols-3">
           <ValueProp
             title="Find Alumni Near You"
             description="Moving to a new city? Discover BYU MBAs already there. Get advice on neighborhoods, employers, and community before you arrive."
@@ -98,7 +115,7 @@ export default function Home() {
               View All
             </Link>
           </div>
-          <div className="mt-8 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+          <div className="mt-8 grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
             {alumni.slice(0, 4).map((a) => (
               <Link
                 key={a.id}
@@ -135,8 +152,8 @@ export default function Home() {
 function StatCard({ number, label }: { number: string; label: string }) {
   return (
     <div className="text-center">
-      <p className="text-3xl font-bold text-[#002E5D] sm:text-4xl">{number}</p>
-      <p className="mt-1 text-sm text-gray-600">{label}</p>
+      <p className="text-2xl font-bold text-[#002E5D] sm:text-3xl lg:text-4xl">{number}</p>
+      <p className="mt-1 text-xs text-gray-600 sm:text-sm">{label}</p>
     </div>
   );
 }

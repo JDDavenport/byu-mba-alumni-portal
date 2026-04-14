@@ -19,9 +19,14 @@ export async function generateMetadata({
   const { id } = await params;
   const a = getAlumniById(id);
   if (!a) return { title: "Alumni Not Found" };
+  const description = `${a.name} — ${a.title} at ${a.company}. BYU MBA Class of ${a.graduationYear}.`;
   return {
-    title: `${a.name} | BYU MBA Alumni Network`,
-    description: `${a.name} — ${a.title} at ${a.company}. BYU MBA Class of ${a.graduationYear}.`,
+    title: a.name,
+    description,
+    openGraph: {
+      title: a.name,
+      description,
+    },
   };
 }
 

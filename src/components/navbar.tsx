@@ -17,7 +17,7 @@ const navLinks = [
   { href: "/directory", label: "Directory" },
   { href: "/events", label: "Events" },
   { href: "/jobs", label: "Jobs" },
-  { href: "#", label: "Map", disabled: true },
+  { href: "/map", label: "Map" },
 ];
 
 export function Navbar() {
@@ -42,19 +42,15 @@ export function Navbar() {
           {navLinks.map((link) => (
             <Link
               key={link.href}
-              href={link.disabled ? "#" : link.href}
+              href={link.href}
               className={cn(
                 "rounded-md px-3 py-2 text-sm font-medium transition-colors",
                 pathname === link.href
                   ? "bg-[#002E5D]/10 text-[#002E5D]"
-                  : "text-gray-600 hover:bg-gray-100 hover:text-gray-900",
-                link.disabled && "pointer-events-none opacity-50"
+                  : "text-gray-600 hover:bg-gray-100 hover:text-gray-900"
               )}
             >
               {link.label}
-              {link.disabled && (
-                <span className="ml-1 text-xs text-gray-400">(soon)</span>
-              )}
             </Link>
           ))}
         </nav>
@@ -96,20 +92,16 @@ export function Navbar() {
               {navLinks.map((link) => (
                 <Link
                   key={link.href}
-                  href={link.disabled ? "#" : link.href}
+                  href={link.href}
                   onClick={() => setOpen(false)}
                   className={cn(
                     "rounded-md px-3 py-2 text-sm font-medium transition-colors",
                     pathname === link.href
                       ? "bg-[#002E5D]/10 text-[#002E5D]"
-                      : "text-gray-600 hover:bg-gray-100",
-                    link.disabled && "pointer-events-none opacity-50"
+                      : "text-gray-600 hover:bg-gray-100"
                   )}
                 >
                   {link.label}
-                  {link.disabled && (
-                    <span className="ml-1 text-xs text-gray-400">(soon)</span>
-                  )}
                 </Link>
               ))}
               <Link

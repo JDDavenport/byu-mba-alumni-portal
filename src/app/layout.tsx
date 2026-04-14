@@ -15,9 +15,29 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "BYU MBA Alumni Network",
+  title: {
+    default: "BYU MBA Alumni Network",
+    template: "%s | BYU MBA Alumni Network",
+  },
   description:
     "Connect with BYU Marriott School MBA alumni across industries and geographies. Find mentors, discover opportunities, and strengthen the Cougar network.",
+  metadataBase: new URL(
+    process.env.NEXT_PUBLIC_SITE_URL || "https://byumba.alumni.network"
+  ),
+  openGraph: {
+    title: "BYU MBA Alumni Network",
+    description:
+      "Connect with BYU Marriott School MBA alumni across industries and geographies. Find mentors, discover opportunities, and strengthen the Cougar network.",
+    type: "website",
+    siteName: "BYU MBA Alumni Network",
+    locale: "en_US",
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "BYU MBA Alumni Network",
+    description:
+      "Connect with BYU Marriott School MBA alumni across industries and geographies.",
+  },
 };
 
 export default function RootLayout({

@@ -2,9 +2,14 @@ import type { Metadata } from "next";
 import { JobsList } from "@/components/jobs-list";
 
 export const metadata: Metadata = {
-  title: "Jobs | BYU MBA Alumni Network",
+  title: "Jobs",
   description:
     "Job opportunities posted by BYU MBA alumni and partner companies.",
+  openGraph: {
+    title: "Jobs",
+    description:
+      "Job opportunities posted by BYU MBA alumni and partner companies.",
+  },
 };
 
 export default function JobsPage() {

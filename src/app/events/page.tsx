@@ -2,9 +2,14 @@ import type { Metadata } from "next";
 import { EventsList } from "@/components/events-list";
 
 export const metadata: Metadata = {
-  title: "Events | BYU MBA Alumni Network",
+  title: "Events",
   description:
     "Upcoming BYU MBA alumni events — mixers, panels, BBQs, and more.",
+  openGraph: {
+    title: "Events",
+    description:
+      "Upcoming BYU MBA alumni events — mixers, panels, BBQs, and more.",
+  },
 };
 
 export default function EventsPage() {

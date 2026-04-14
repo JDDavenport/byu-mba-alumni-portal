@@ -2,9 +2,14 @@ import type { Metadata } from "next";
 import { DirectoryFilters } from "@/components/directory-filters";
 
 export const metadata: Metadata = {
-  title: "Alumni Directory | BYU MBA Alumni Network",
+  title: "Alumni Directory",
   description:
     "Search and filter the BYU MBA alumni directory by name, industry, company, city, and graduation year.",
+  openGraph: {
+    title: "Alumni Directory",
+    description:
+      "Search and filter the BYU MBA alumni directory by name, industry, company, city, and graduation year.",
+  },
 };
 
 export default function DirectoryPage() {
