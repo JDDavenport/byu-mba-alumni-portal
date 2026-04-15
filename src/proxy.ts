@@ -7,32 +7,26 @@ import { NextResponse, type NextRequest } from "next/server";
  * Protected routes (profile editing, RSVP, mentorship requests) will
  * require a valid Supabase session once auth is fully wired up.
  */
-export function proxy(request: NextRequest) {
+export function proxy(_request: NextRequest) {
+  // DEMO MODE: all routes are public — no auth wall
+  // When Supabase auth is wired up, restore the protected route logic below
+  return NextResponse.next();
+
+  /*
   const { pathname } = request.nextUrl;
 
-  // Public routes — no auth required
   const publicPaths = [
-    "/",
-    "/directory",
-    "/events",
-    "/jobs",
-    "/auth",
-    "/auth/callback",
-    "/api/alumni",
-    "/api/events",
-    "/api/jobs",
+    "/", "/directory", "/events", "/jobs",
+    "/auth", "/auth/callback",
+    "/api/alumni", "/api/events", "/api/jobs",
   ];
 
   const isPublic = publicPaths.some(
     (path) => pathname === path || pathname.startsWith(path + "/")
   );
 
-  if (isPublic) {
-    return NextResponse.next();
-  }
+  if (isPublic) return NextResponse.next();
 
-  // For protected routes, check for Supabase auth cookie
-  // The cookie name follows the pattern: sb-<project-ref>-auth-token
   const hasAuthCookie = request.cookies
     .getAll()
     .some((c) => c.name.startsWith("sb-") && c.name.endsWith("-auth-token"));
@@ -44,6 +38,7 @@ export function proxy(request: NextRequest) {
   }
 
   return NextResponse.next();
+  */
 }
 
 export const config = {
