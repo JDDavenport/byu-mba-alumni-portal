@@ -5,7 +5,47 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
-import { alumni, getAlumniById } from "@/data/alumni";
+import { alumni, getAlumniById, type Alumni } from "@/data/alumni";
+import { getSupabaseServer } from "@/lib/supabase";
+
+/**
+ * Fetch a single alumni profile from Supabase, falling back to static data.
+ */
+async function fetchAlumni(id: string): Promise<Alumni | null> {
+  const supabase = getSupabaseServer();
+
+  if (supabase) {
+    const { data } = await supabase
+      .from("alumni")
+      .select("*")
+      .eq("id", id)
+      .eq("is_active", true)
+      .single();
+
+    if (data) {
+      return {
+        id: data.id,
+        name: data.name,
+        graduationYear: data.graduation_year,
+        company: data.company ?? "",
+        title: data.title ?? "",
+        industry: data.industry ?? "",
+        city: data.city ?? "",
+        state: data.state ?? "",
+        lat: data.lat ?? 0,
+        lng: data.lng ?? 0,
+        linkedinUrl: data.linkedin_url ?? "",
+        avatarUrl: data.avatar_url ?? "",
+        bio: data.bio ?? "",
+        skills: data.skills ?? [],
+        willingToMentor: data.willing_to_mentor ?? false,
+      };
+    }
+  }
+
+  // Static fallback
+  return getAlumniById(id) ?? null;
+}
 
 export function generateStaticParams() {
   return alumni.map((a) => ({ id: a.id }));
@@ -17,7 +57,7 @@ export async function generateMetadata({
   params: Promise<{ id: string }>;
 }): Promise<Metadata> {
   const { id } = await params;
-  const a = getAlumniById(id);
+  const a = await fetchAlumni(id);
   if (!a) return { title: "Alumni Not Found" };
   const description = `${a.name} — ${a.title} at ${a.company}. BYU MBA Class of ${a.graduationYear}.`;
   return {
@@ -36,7 +76,7 @@ export default async function AlumniProfilePage({
   params: Promise<{ id: string }>;
 }) {
   const { id } = await params;
-  const a = getAlumniById(id);
+  const a = await fetchAlumni(id);
 
   if (!a) {
     notFound();

@@ -15,7 +15,14 @@ export async function GET(request: NextRequest) {
 
   // ---------- Supabase path ----------
   if (supabase) {
-    let query = supabase.from("alumni").select("*");
+    // Only select fields needed for directory cards (not full profile)
+    let query = supabase
+      .from("alumni")
+      .select(
+        "id, name, first_name, last_name, graduation_year, degree, company, title, industry, city, state, country, lat, lng, linkedin_url, avatar_url, bio, skills, willing_to_mentor, byu_email_verified"
+      )
+      .eq("is_active", true)
+      .eq("show_in_directory", true);
 
     if (q) {
       query = query.or(
@@ -34,9 +41,15 @@ export async function GET(request: NextRequest) {
     if (yearMin) query = query.gte("graduation_year", parseInt(yearMin));
     if (yearMax) query = query.lte("graduation_year", parseInt(yearMax));
 
-    query = query.order("name");
+    // Pagination support
+    const page = parseInt(searchParams.get("page") ?? "1");
+    const pageSize = parseInt(searchParams.get("page_size") ?? "100");
+    const from = (page - 1) * pageSize;
+    const to = from + pageSize - 1;
 
-    const { data, error } = await query;
+    query = query.order("name").range(from, to);
+
+    const { data, error, count } = await query;
 
     if (error) {
       return Response.json({ error: error.message }, { status: 500 });
@@ -47,21 +60,26 @@ export async function GET(request: NextRequest) {
       id: row.id,
       name: row.name,
       graduationYear: row.graduation_year,
+      degree: row.degree,
       company: row.company,
       title: row.title,
       industry: row.industry,
       city: row.city,
       state: row.state,
+      country: row.country,
       lat: row.lat,
       lng: row.lng,
       linkedinUrl: row.linkedin_url,
       avatarUrl: row.avatar_url,
       bio: row.bio,
-      skills: row.skills,
+      skills: row.skills ?? [],
       willingToMentor: row.willing_to_mentor,
+      byuEmailVerified: row.byu_email_verified,
     }));
 
-    return Response.json(mapped);
+    return Response.json(mapped, {
+      headers: count != null ? { "X-Total-Count": String(count) } : {},
+    });
   }
 
   // ---------- Static fallback ----------

@@ -12,7 +12,7 @@ import {
 } from "@/components/ui/select";
 import { Button } from "@/components/ui/button";
 import {
-  alumni as allAlumni,
+  alumni as staticAlumni,
   getUniqueIndustries,
   type Alumni,
 } from "@/data/alumni";
@@ -24,23 +24,25 @@ const STYLE_URL = "https://basemaps.cartocdn.com/gl/positron-gl-style/style.json
 function alumniToGeoJSON(data: Alumni[]): GeoJSON.FeatureCollection {
   return {
     type: "FeatureCollection",
-    features: data.map((a) => ({
-      type: "Feature" as const,
-      geometry: {
-        type: "Point" as const,
-        coordinates: [a.lng, a.lat],
-      },
-      properties: {
-        id: a.id,
-        name: a.name,
-        title: a.title,
-        company: a.company,
-        graduationYear: a.graduationYear,
-        industry: a.industry,
-        city: a.city,
-        state: a.state,
-      },
-    })),
+    features: data
+      .filter((a) => a.lat != null && a.lng != null)
+      .map((a) => ({
+        type: "Feature" as const,
+        geometry: {
+          type: "Point" as const,
+          coordinates: [a.lng, a.lat],
+        },
+        properties: {
+          id: a.id,
+          name: a.name,
+          title: a.title,
+          company: a.company,
+          graduationYear: a.graduationYear,
+          industry: a.industry,
+          city: a.city,
+          state: a.state,
+        },
+      })),
   };
 }
 
@@ -52,11 +54,46 @@ export function AlumniMap() {
   const [industry, setIndustry] = useState(ALL);
   const [yearRange, setYearRange] = useState(ALL);
   const [mapLoaded, setMapLoaded] = useState(false);
+  const [alumni, setAlumni] = useState<Alumni[]>(staticAlumni);
+  const [useApi, setUseApi] = useState(true);
 
   const industries = useMemo(() => getUniqueIndustries(), []);
 
+  // Fetch alumni from API (falls back to static data on failure)
+  const fetchAlumni = useCallback(async () => {
+    if (!useApi) return;
+    try {
+      const params = new URLSearchParams();
+      if (industry !== ALL) params.set("industry", industry);
+      if (yearRange !== ALL) {
+        const [min, max] = yearRange.split("-");
+        params.set("year_min", min);
+        params.set("year_max", max);
+      }
+      // Request a large page for map (we want all points)
+      params.set("page_size", "5000");
+
+      const res = await fetch(`/api/alumni?${params.toString()}`);
+      if (res.ok) {
+        const data = await res.json();
+        setAlumni(data);
+        return;
+      }
+    } catch {
+      // Network/API error — fall back to static
+    }
+    setUseApi(false);
+  }, [industry, yearRange, useApi]);
+
+  useEffect(() => {
+    fetchAlumni();
+  }, [fetchAlumni]);
+
   const filtered = useMemo(() => {
-    return allAlumni.filter((a) => {
+    // If using API, data is already filtered server-side
+    if (useApi) return alumni;
+
+    return staticAlumni.filter((a) => {
       if (industry !== ALL && a.industry !== industry) return false;
       if (yearRange !== ALL) {
         const [min, max] = yearRange.split("-").map(Number);
@@ -64,7 +101,7 @@ export function AlumniMap() {
       }
       return true;
     });
-  }, [industry, yearRange]);
+  }, [alumni, useApi, industry, yearRange]);
 
   const geojson = useMemo(() => alumniToGeoJSON(filtered), [filtered]);
 
@@ -100,7 +137,7 @@ export function AlumniMap() {
       // Add source with clustering
       map.addSource("alumni", {
         type: "geojson",
-        data: alumniToGeoJSON(allAlumni),
+        data: alumniToGeoJSON(alumni),
         cluster: true,
         clusterMaxZoom: 12,
         clusterRadius: 50,
